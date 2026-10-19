@@ -330,13 +330,29 @@ function loadMedia() {
 
 // ★★★★★★ 第 2 步 开始 / STEP 2 START：drawMask（把整个函数换成 Qwen 写的版本 / replace the whole function with Qwen's version）★★★★★★
 function drawMask(face, m) {
-  // 临时版本：只画一个半透明的椭圆 / placeholder: only a see-through ellipse
-  const f = faceFrame(face);
+  // 脸的坐标系（位置、脸宽、三个方向）和模型的包围盒（中心、宽度）
+  let f = faceFrame(face);
+  let box = modelBox(m.shape);
+  // 缩放系数：让模型宽度 = 脸宽 × m.size
+  let k = (f.s * m.size) / box.w;
   push();
-  translate(f.x, f.y, 10);
-  fill(255, 60);
-  stroke(255);
-  ellipse(0, 0, f.s, f.s * 1.3);
+  translate(f.x, f.y, f.z);   // 移到脸的位置
+  // 转到脸朝的方向：X/Y/Z 三个向量作为新的坐标轴
+  applyMatrix(f.X.x, f.X.y, f.X.z, 0, f.Y.x, f.Y.y, f.Y.z, 0, f.Z.x, f.Z.y, f.Z.z, 0, 0, 0, 0, 1);
+  translate(m.x * f.s, m.y * f.s, m.z * f.s);   // 按脸谱设置微调位置（单位是脸宽）
+  rotateX(radians(m.turnX));   // 三个方向各转多少度
+  rotateY(radians(m.turnY));
+  rotateZ(radians(m.turnZ));
+  // 模型是“Y 轴朝上”的就翻转 Y（flipY）；x、z 方向统一缩放 k
+  scale(k, m.flipY ? -k : k, k);
+  translate(-box.cx, -box.cy, -box.cz);   // 把模型中心移到原点
+  noStroke();
+  if (m.image) {
+    texture(m.image);   // 贴上这张脸谱的贴图
+  } else {
+    fill(200);          // 没有贴图就用灰色
+  }
+  model(m.shape);       // 画出 3D 面具
   pop();
 }
 // ★★★★★★ 第 2 步 结束 / STEP 2 END ★★★★★★
