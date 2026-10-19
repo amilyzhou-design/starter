@@ -385,7 +385,12 @@ function faceFrame(face) {
 
 // ★★★★★★ 第 4 步 开始 / STEP 4 START：stageLights（把整个函数换成 Qwen 写的版本 / replace the whole function with Qwen's version）★★★★★★
 function stageLights(f) {
-  // 临时版本：没有灯光（面具看起来是平的，像贴纸）/ placeholder: no lights (the mask looks flat, like a sticker)
+  // 柔和的暖色环境光：到处都有一点，面具不会全黑
+  ambientLight(110, 90, 80);
+  // 主灯：从左上方照下来的暖白光，照出鼻子、脸颊和额头的立体形状
+  directionalLight(255, 235, 210, 0.4, 0.5, -1);
+  // 侧灯：橙红色的点光，放在脸的右侧前方，跟着脸走，像舞台侧面的追光
+  pointLight(255, 90, 40, f.x + f.s * 1.2, f.y, f.z + f.s);
 }
 // ★★★★★★ 第 4 步 结束 / STEP 4 END ★★★★★★
 
